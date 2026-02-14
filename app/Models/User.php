@@ -1,0 +1,113 @@
+<?php
+
+namespace App\Models;
+
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+class User extends Authenticatable
+{
+    const ROLE_ADMIN   = 'admin';
+    const ROLE_COMPANY = 'company';
+    const ROLE_USER    = 'user';
+    
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory, Notifiable;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'role',
+        'subscription_tier',
+        'password',
+    ];
+
+    /**
+     * The attributes that should be hidden for serialization.
+     *
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
+    }
+
+    /**
+     * Check if the user is a premium member.
+     */
+    public function isPremium(): bool
+    {
+        return $this->subscription_tier === 'premium';
+    }
+
+    /**
+     * Get the resume limit based on subscription tier.
+     */
+    public function getResumeLimitAttribute(): int
+    {
+        return $this->isPremium() ? 5 : 1;
+    }
+
+    /**
+     * Get the user's resumes.
+     */
+    public function resumes()
+    {
+        return $this->hasMany(Resume::class);
+    }
+
+    /**
+     * Get the user's saved items.
+     */
+    public function savedItems()
+    {
+        return $this->hasMany(SavedItem::class);
+    }
+
+    /**
+     * Check if the user has saved a specific item.
+     */
+    public function hasSaved($item)
+    {
+        return $this->savedItems()
+            ->where('item_id', $item->id)
+            ->where('item_type', get_class($item))
+            ->exists();
+    }
+
+    /**
+     * Get the user's reviews.
+     */
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    /**
+     * Get the user's job applications.
+     */
+    public function applications()
+    {
+        return $this->hasMany(JobApplication::class);
+    }
+}
