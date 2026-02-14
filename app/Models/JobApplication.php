@@ -2,37 +2,31 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class JobApplication extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'job_id',
         'user_id',
-        'company_id',
         'resume_id',
-        'resume_snapshot',
         'match_score',
-        'cover_letter',
-        'answers',
+        'match_details',
+        'resume_snapshot',
         'status',
-        'applied_at',
-        'reviewed_at',
-        'rejected_at',
-        'hired_at',
+        'cover_letter',
+        'answers'
     ];
 
     protected $casts = [
-        'resume_snapshot' => 'json',
-        'answers' => 'json',
+        'match_details' => 'array',
+        'resume_snapshot' => 'array',
+        'answers' => 'array',
         'applied_at' => 'datetime',
-        'reviewed_at' => 'datetime',
-        'rejected_at' => 'datetime',
-        'hired_at' => 'datetime',
+        'match_score' => 'integer',
     ];
 
     public function job()
@@ -45,13 +39,8 @@ class JobApplication extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function company()
-    {
-        return $this->belongsTo(Company::class);
-    }
-
     public function resume()
     {
-        return $this->belongsTo(Resume::class);
+        return $this->belongsTo(Resume::class)->withTrashed(); // In case resume is deleted later
     }
 }

@@ -58,7 +58,7 @@
                         <a class="nav-link {{ request()->routeIs('user.resumes.*') ? 'active' : '' }}" href="{{ route('user.resumes.index') }}">
                             <i class="fas fa-file-alt"></i> Resumes
                         </a>
-                        <a class="nav-link {{ request()->routeIs('user.applications') ? 'active' : '' }}" href="{{ route('user.applications') }}">
+                        <a class="nav-link {{ request()->routeIs('user.applications.index') ? 'active' : '' }}" href="{{ route('user.applications.index') }}">
                             <i class="fas fa-briefcase"></i> Applications
                         </a>
                         <a class="nav-link {{ request()->routeIs('user.settings') ? 'active' : '' }}" href="{{ route('user.settings') }}">

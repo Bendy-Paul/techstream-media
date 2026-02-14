@@ -79,10 +79,10 @@
                     </div>
                     <div>
                         <h6 class="card-title text-muted mb-0">Applications</h6>
-                        <h3 class="fw-bold mb-0">5</h3>
+                        <h3 class="fw-bold mb-0">{{ $applicationsCount }}</h3>
                     </div>
                 </div>
-                <a href="{{ route('user.applications') }}" class="small text-decoration-none">View History <i class="fas fa-arrow-right ms-1"></i></a>
+                <a href="{{ route('user.applications.index') }}" class="small text-decoration-none">View History <i class="fas fa-arrow-right ms-1"></i></a>
             </div>
         </div>
     </div>

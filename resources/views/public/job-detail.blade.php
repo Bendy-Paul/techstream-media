@@ -140,10 +140,66 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    <a href="{{ $job->apply_link ?? '#' }}" class="btn btn-primary btn-apply text-white mb-2" target="_blank">
-                        Apply Now <i class="fas fa-external-link-alt ms-2"></i>
-                    </a>
+                    @if($job->application_type === 'smart_apply')
+                        @auth
+                            <button type="button" class="btn btn-primary btn-apply text-white mb-2" data-bs-toggle="modal" data-bs-target="#applyModal">
+                                Apply Now <i class="fas fa-paper-plane ms-2"></i>
+                            </button>
+                        @else
+                            <a href="{{ route('login') }}" class="btn btn-primary btn-apply text-white mb-2">
+                                Login to Apply <i class="fas fa-sign-in-alt ms-2"></i>
+                            </a>
+                        @endauth
+                    @else
+                        <a href="{{ $job->apply_link ?? '#' }}" class="btn btn-primary btn-apply text-white mb-2" target="_blank">
+                            Apply Now <i class="fas fa-external-link-alt ms-2"></i>
+                        </a>
+                    @endif
                 </div>
+
+    <!-- Apply Modal -->
+    <div class="modal fade" id="applyModal" tabindex="-1" aria-labelledby="applyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="applyModalLabel">Apply for {{ $job->title }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('job.apply') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="job_id" value="{{ $job->id }}">
+                    
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i> You are applying using your <strong>Tech Media Directory Profile</strong>.
+                        </div>
+
+                        <p class="mb-3">By clicking "Confirm Apply", you agree to share your:</p>
+                        <ul class="mb-4 text-muted">
+                            <li>Resume & Skills Snapshot</li>
+                            <li>Contact Information</li>
+                            <li>Profile Match Score</li>
+                        </ul>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="consent" id="consentCheck" required>
+                            <label class="form-check-label" for="consentCheck">
+                                I agree to share my data with <strong>{{ optional($job->company)->name }}</strong> for recruitment purposes.
+                            </label>
+                        </div>
+
+                        <small class="text-muted d-block mb-3">
+                            Your application data will be stored for the duration of the recruitment process.
+                        </small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm Apply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
             </div>
         </div>
     </section>

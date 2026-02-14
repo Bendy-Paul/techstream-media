@@ -27,6 +27,8 @@ class User extends Authenticatable
         'role',
         'subscription_tier',
         'password',
+        'is_subscribed_newsletter',
+        'is_subscribed_job_board',
     ];
 
     /**
@@ -49,6 +51,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_subscribed_newsletter' => 'boolean',
+            'is_subscribed_job_board' => 'boolean',
         ];
     }
 

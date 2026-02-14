@@ -34,8 +34,11 @@ Route::middleware('auth', 'role:user')->group(function () {
     Route::controller(App\Http\Controllers\User\DashboardController::class)->group(function () {
         Route::get('/user/dashboard', 'index')->name('user.dashboard');
         Route::get('/user/saved-items', 'savedItems')->name('user.saved-items');
-        Route::get('/user/applications', 'applications')->name('user.applications');
+        Route::get('/user/applications', 'applications')->name('user.applications.index');
         Route::get('/user/settings', 'settings')->name('user.settings');
+        Route::put('/user/settings', 'updateSettings')->name('user.settings.update');
+        Route::put('/user/settings/subscriptions', 'updateSubscriptions')->name('user.settings.update-subscriptions');
+        Route::delete('/user/account', 'deleteAccount')->name('user.account.delete');
     });
 
     Route::resource('user/resumes', App\Http\Controllers\User\ResumeController::class, [
@@ -49,6 +52,10 @@ Route::middleware('auth', 'role:user')->group(function () {
             'destroy' => 'user.resumes.destroy',
         ]
     ]);
+    
+    // Application Routes
+    Route::post('/jobs/apply', [App\Http\Controllers\JobApplicationController::class, 'store'])->name('job.apply');
+    Route::delete('/applications/{id}', [App\Http\Controllers\JobApplicationController::class, 'destroy'])->name('applications.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -89,6 +96,10 @@ Route::middleware('auth', 'role:admin')->group(function () {
     Route::get('/admin/jobs/{id}/edit', [AdminJobController::class, 'edit'])->name('admin.jobs.edit');
     Route::put('/admin/jobs/{id}', [AdminJobController::class, 'update'])->name('admin.jobs.update');
     Route::delete('/admin/jobs/{job}', [AdminJobController::class, 'destroy'])->name('admin.jobs.destroy');
+
+    Route::get('/admin/applications', [App\Http\Controllers\Admin\JobApplicationController::class, 'index'])->name('admin.applications.index');
+    Route::get('/admin/applications/{id}', [App\Http\Controllers\Admin\JobApplicationController::class, 'show'])->name('admin.applications.show');
+    Route::put('/admin/applications/{id}', [App\Http\Controllers\Admin\JobApplicationController::class, 'update'])->name('admin.applications.update');
 
     Route::get('/admin/companies', [AdminCompanyController::class, 'index'])->name('admin.companies.index');
     Route::get('/admin/companies/create', [AdminCompanyController::class, 'create'])->name('admin.companies.create');
