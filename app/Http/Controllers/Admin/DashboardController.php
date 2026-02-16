@@ -18,7 +18,11 @@ class DashboardController extends Controller
         $totalCompanies = Company::count();
         $totalArticles = Article::count();
         $totalevents = Event::count();
+        $totalevents = Event::count();
         $companies = Company::limit(5)->get();
-        return view('admin.dashboard', compact('totalUsers', 'totalCompanies', 'totalArticles', 'totalevents', 'companies'));
+        // Return activities for the logged-in admin
+        $activities = auth()->user()->activities()->latest()->take(10)->get();
+        
+        return view('admin.dashboard', compact('totalUsers', 'totalCompanies', 'totalArticles', 'totalevents', 'companies', 'activities'));
     }
 }

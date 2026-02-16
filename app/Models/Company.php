@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\RecordsActivity;
+
 class Company extends Model
 {
+    use RecordsActivity;
     //
     protected $fillable = [
         'name',

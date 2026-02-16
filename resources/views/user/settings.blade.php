@@ -26,8 +26,48 @@
                             <input type="email" class="form-control" id="email" name="email" value="{{ auth()->user()->email }}" required>
                         </div>
 
+                        <hr class="my-4">
+                        <h6 class="fw-bold mb-3">Confirm Changes</h6>
+                        <div class="mb-3">
+                            <label for="current_password" class="form-label">Current Password <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="current_password" name="current_password" required placeholder="Enter password to save changes">
+                        </div>
+
                         <div class="d-flex justify-content-end">
-                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                            <button type="submit" class="btn btn-primary">Save Profile Info</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Change Password -->
+            <div class="card border-0 shadow-sm rounded-4 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold mb-0">Security</h5>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('user.settings.password') }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        
+                        <div class="mb-3">
+                            <label for="pwd_current" class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="pwd_current" name="current_password" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="pwd_new" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="pwd_new" name="password" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pwd_confirm" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="pwd_confirm" name="password_confirmation" required>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-outline-primary">Update Password</button>
                         </div>
                     </form>
                 </div>

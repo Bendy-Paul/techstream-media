@@ -140,9 +140,9 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    @if($job->application_type === 'smart_apply')
+                    @if($job->application_type === 'smart_apply' && auth()->user() && auth()->user()->role === 'user')
                         @auth
-                            <button type="button" class="btn btn-primary btn-apply text-white mb-2" data-bs-toggle="modal" data-bs-target="#applyModal">
+                            <button type="button" class="btn btn-primary btn-apply text-white mb-2" data-bs-toggle="modal" data-bs-target="#applyModal" {{auth()->user()->applications()->where('job_id', $job->id)->exists() ? 'disabled' : ''}}>
                                 Apply Now <i class="fas fa-paper-plane ms-2"></i>
                             </button>
                         @else
@@ -310,7 +310,6 @@
                     </div>
 
                     @if($job->salary_range)
-                    <div class="meta-item">
                     <div class="meta-item">
                         <i class="fas fa-money-bill-wave"></i>
                         <div>

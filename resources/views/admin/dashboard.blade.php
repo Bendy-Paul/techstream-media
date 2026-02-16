@@ -95,6 +95,39 @@
         </div>
     </div>
 
+    <!-- Admin Activity Log -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Your Recent Activity</h5>
+        </div>
+        <div class="card-body p-0">
+             <ul class="list-group list-group-flush">
+                @forelse($activities as $activity)
+                    <li class="list-group-item px-4 py-3 d-flex align-items-center {{ !$loop->last ? 'border-bottom' : '' }}">
+                        <div class="me-3">
+                             <div class="bg-light rounded-circle d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
+                                <i class="fas fa-history text-muted"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <p class="mb-0 fw-medium text-dark">{{ ucfirst(str_replace('_', ' ', $activity->type)) }}</p>
+                            <small class="text-muted">
+                                @if(isset($activity->meta['title']))
+                                    {{ $activity->meta['title'] }}
+                                @elseif($activity->subject_type)
+                                    {{ class_basename($activity->subject_type) }} #{{ $activity->subject_id }}
+                                @endif
+                            </small>
+                        </div>
+                        <small class="text-muted">{{ $activity->created_at->diffForHumans() }}</small>
+                    </li>
+                @empty
+                    <li class="list-group-item px-4 py-3 text-center text-muted">No recent activity.</li>
+                @endforelse
+            </ul>
+        </div>
+    </div>
+
     <!-- Recent Activity Table -->
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">

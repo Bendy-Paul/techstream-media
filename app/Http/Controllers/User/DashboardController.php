@@ -18,8 +18,9 @@ class DashboardController extends Controller
         $applicationsCount = $user->applications()->count();
         $resumeLimit = $user->resume_limit;
         $savedItemsCount = $user->savedItems()->count();
+        $activities = $user->activities()->latest()->take(10)->get();
 
-        return view('user.dashboard', compact('resumeCount', 'applicationsCount', 'resumeLimit', 'savedItemsCount'));
+        return view('user.dashboard', compact('resumeCount', 'applicationsCount', 'resumeLimit', 'savedItemsCount', 'activities'));
     }
 
     public function savedItems()
@@ -68,11 +69,26 @@ class DashboardController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
+            'current_password' => ['required', 'current_password'],
         ]);
 
         auth()->user()->update($request->only('name', 'email'));
 
         return back()->with('success', 'Profile updated successfully.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
+        ]);
+
+        auth()->user()->update([
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+        ]);
+
+        return back()->with('success', 'Password updated successfully.');
     }
 
     public function updateSubscriptions(Request $request)

@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+use App\Traits\RecordsActivity;
+
 class SavedItem extends Model
 {
+    use RecordsActivity;
     protected $fillable = ['user_id', 'item_id', 'item_type'];
 
     /**

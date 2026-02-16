@@ -4,8 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\Traits\RecordsActivity;
+
 class Event extends Model
 {
+    use RecordsActivity;
     //
     protected $fillable = [
         'organizer_company_id',

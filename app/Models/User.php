@@ -114,4 +114,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(JobApplication::class);
     }
+
+    /**
+     * Get the user's activities.
+     */
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
 }

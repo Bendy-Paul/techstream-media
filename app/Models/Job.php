@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\Stack; // Added this line
 
+use App\Traits\RecordsActivity;
+
 class Job extends Model
 {
+    use RecordsActivity;
     //
     protected $fillable = [
         'title',

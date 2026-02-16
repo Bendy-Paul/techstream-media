@@ -37,6 +37,7 @@ Route::middleware('auth', 'role:user')->group(function () {
         Route::get('/user/applications', 'applications')->name('user.applications.index');
         Route::get('/user/settings', 'settings')->name('user.settings');
         Route::put('/user/settings', 'updateSettings')->name('user.settings.update');
+        Route::put('/user/settings/password', 'updatePassword')->name('user.settings.password');
         Route::put('/user/settings/subscriptions', 'updateSubscriptions')->name('user.settings.update-subscriptions');
         Route::delete('/user/account', 'deleteAccount')->name('user.account.delete');
     });

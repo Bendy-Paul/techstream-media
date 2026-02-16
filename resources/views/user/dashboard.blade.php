@@ -54,7 +54,7 @@
 
 <div class="row g-4 mb-4">
     <!-- Stats Cards -->
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
@@ -70,7 +70,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-6">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
@@ -86,7 +86,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
+    {{-- <div class="col-md-4">
         <div class="card border-0 shadow-sm h-100">
             <div class="card-body">
                 <div class="d-flex align-items-center mb-3">
@@ -101,7 +101,7 @@
                 <a href="#" class="small text-decoration-none">View All <i class="fas fa-arrow-right ms-1"></i></a>
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 
 <div class="row">
@@ -112,36 +112,88 @@
             </div>
             <div class="card-body">
                 <ul class="list-group list-group-flush">
-                    <li class="list-group-item px-0 py-3 d-flex align-items-center border-bottom">
-                        <div class="bg-light p-2 rounded me-3 text-center" style="width: 40px;">
-                            <i class="fas fa-briefcase text-primary"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">Applied for <span class="fw-bold">Senior Developer</span></h6>
-                            <small class="text-muted">TechCorp Inc.</small>
-                        </div>
-                        <small class="text-muted">2 hours ago</small>
-                    </li>
-                    <li class="list-group-item px-0 py-3 d-flex align-items-center border-bottom">
-                        <div class="bg-light p-2 rounded me-3 text-center" style="width: 40px;">
-                            <i class="fas fa-bookmark text-warning"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">Saved <span class="fw-bold">Frontend Engineer</span> job</h6>
-                            <small class="text-muted">StartupX</small>
-                        </div>
-                        <small class="text-muted">Yesterday</small>
-                    </li>
-                    <li class="list-group-item px-0 py-3 d-flex align-items-center">
-                        <div class="bg-light p-2 rounded me-3 text-center" style="width: 40px;">
-                            <i class="fas fa-user-edit text-info"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <h6 class="mb-0">Updated Profile Information</h6>
-                            <small class="text-muted">Personal Details</small>
-                        </div>
-                        <small class="text-muted">3 days ago</small>
-                    </li>
+                    @forelse($activities as $activity)
+                        <li class="list-group-item px-0 py-3 d-flex align-items-center {{ !$loop->last ? 'border-bottom' : '' }}">
+                            @php
+                                $icon = 'fas fa-circle';
+                                $color = 'text-secondary';
+                                $text = 'Activity';
+                                $subtext = '';
+
+                                switch($activity->type) {
+                                    case 'job_applied':
+                                        $icon = 'fas fa-briefcase';
+                                        $color = 'text-primary';
+                                        $text = 'Applied for ' . ($activity->meta['job_title'] ?? 'a Job');
+                                        $subtext = $activity->meta['company_name'] ?? '';
+                                        break;
+                                    case 'jobapplication_updated':
+                                        $icon = 'fas fa-briefcase';
+                                        $color = 'text-primary';
+                                        $text = 'Status updated for ' . ($activity->meta['job_title'] ?? 'a Job');
+                                        $subtext = $activity->meta['company_name'] ?? '';
+                                        break;
+                                    case 'jobapplication_deleted':
+                                        $icon = 'fas fa-briefcase';
+                                        $color = 'text-primary';
+                                        $text = 'Application deleted for ' . ($activity->meta['job_title'] ?? 'a Job');
+                                        $subtext = $activity->meta['company_name'] ?? '';
+                                        break;
+                                    case 'job_saved':
+                                        $icon = 'fas fa-bookmark';
+                                        $color = 'text-warning';
+                                        $text = 'Saved ' . ($activity->meta['title'] ?? 'a Job');
+                                        $subtext = 'Saved to collection';
+                                        break;
+                                    case 'event_saved':
+                                        $icon = 'fas fa-calendar-alt';
+                                        $color = 'text-success';
+                                        $text = 'Saved ' . ($activity->meta['title'] ?? 'a Job');
+                                        $subtext = 'Saved to collection';
+                                        break;
+                                    case 'company_saved':
+                                        $icon = 'fas fa-building';
+                                        $color = 'text-primary';
+                                        $text = 'Saved ' . ($activity->meta['title'] ?? 'a Job');
+                                        $subtext = 'Saved to collection';
+                                        break;
+                                    case 'resume_updated':
+                                        $icon = 'fas fa-file-alt';
+                                        $color = 'text-info';
+                                        $text = 'Updated Resume';
+                                        $subtext = $activity->subject->title ?? 'Resume';
+                                        break;
+                                    case 'user_updated': // Assuming profile update logs this
+                                        $icon = 'fas fa-user-edit';
+                                        $color = 'text-success';
+                                        $text = 'Updated Profile Information';
+                                        $subtext = 'Personal Details';
+                                        break;
+                                    case 'saveditem_deleted':
+                                        $icon = 'fas fa-trash';
+                                        $color = 'text-danger';
+                                        $text = 'Deleted ' . ($activity->meta['title'] ?? 'a Job');
+                                        $subtext = 'Deleted from collection';
+                                        break;
+                                    default:
+                                        $text = ucfirst(str_replace('_', ' ', $activity->type));
+                                }
+                            @endphp
+                            
+                            <div class="bg-light p-2 rounded me-3 text-center" style="width: 40px;">
+                                <i class="{{ $icon }} {{ $color }}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ $text }}</h6>
+                                <small class="text-muted">{{ $subtext }}</small>
+                            </div>
+                            <small class="text-muted">{{ $activity->created_at->diffForHumans() }}</small>
+                        </li>
+                    @empty
+                        <li class="list-group-item px-0 py-3 text-center text-muted">
+                            No recent activity.
+                        </li>
+                    @endforelse
                 </ul>
             </div>
         </div>
@@ -153,7 +205,7 @@
                 <h5 class="mb-1">{{ auth()->user()->name }}</h5>
                 <p class="text-muted small mb-3">{{ auth()->user()->email }}</p>
                 <div class="d-grid">
-                    <a href="{{ route('profile.edit') }}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+                    <a href="{{ route('user.settings') }}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
                 </div>
             </div>
         </div>
