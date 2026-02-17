@@ -321,7 +321,7 @@
             <div class="col-md-6 col-lg-4">
                 <div class="job-card p-4">
                     @if($job->job_type)
-                    <span class="job-type-badge">{{ $job->job_type }}</span>
+                    <span class="job-type-badge">{{ $job->job_type }}</span><br><br>
                     @endif
                     
                     <div class="d-flex align-items-start mb-4">

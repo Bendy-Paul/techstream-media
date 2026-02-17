@@ -25,6 +25,11 @@
                             <label for="email" class="form-label">Email Address</label>
                             <input type="email" class="form-control" id="email" name="email" value="{{ auth()->user()->email }}" required>
                         </div>
+                        
+                        <div class="mb-3">
+                            <label for="phone_number" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="phone_number" name="phone_number" value="{{ auth()->user()->phone_number }}" required>
+                        </div>
 
                         <hr class="my-4">
                         <h6 class="fw-bold mb-3">Confirm Changes</h6>

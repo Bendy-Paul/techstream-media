@@ -12,7 +12,8 @@ class User extends Authenticatable
     const ROLE_ADMIN   = 'admin';
     const ROLE_COMPANY = 'company';
     const ROLE_USER    = 'user';
-    
+    const ROLE_EVENT_ORGANIZER = 'event_organizer';
+
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
@@ -24,6 +25,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name',
         'email',
+        'phone_number',
         'role',
         'subscription_tier',
         'password',
@@ -121,5 +123,12 @@ class User extends Authenticatable
     public function activities()
     {
         return $this->hasMany(Activity::class);
+    }
+    /**
+     * Get the user's organizer profiles.
+     */
+    public function organizers()
+    {
+        return $this->morphMany(Organizer::class, 'owner');
     }
 }

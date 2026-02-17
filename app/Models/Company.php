@@ -38,26 +38,26 @@ class Company extends Model
     }
 
     public function branches()
-{
-    return $this->hasMany(Branch::class, 'company_id'); 
-}
+    {
+        return $this->hasMany(Branch::class, 'company_id');
+    }
     public function stacks()
-{
-    return $this->belongsToMany(Tools::class, 'company_stacks', 'company_id', 'stack_id'); 
-}
+    {
+        return $this->belongsToMany(Tools::class, 'company_stacks', 'company_id', 'stack_id');
+    }
 
-// If a company has ONE category (e.g. column 'category_id' in companies table)
-public function categories()
-{
-    return $this->belongsToMany(Category::class, 'company_categories', 'company_id', 'category_id');
-}
+    // If a company has ONE category (e.g. column 'category_id' in companies table)
+    public function categories()
+    {
+        return $this->belongsToMany(Category::class, 'company_categories', 'company_id', 'category_id');
+    }
 
-public function projects()
-{
-    return $this->hasMany(CompanyProject::class, 'company_id');
-}
+    public function projects()
+    {
+        return $this->hasMany(CompanyProject::class, 'company_id');
+    }
 
-public function gallery()
+    public function gallery()
     {
         return $this->hasMany(CompanyGallery::class, 'company_id');
     }
@@ -75,5 +75,9 @@ public function gallery()
     public function jobs()
     {
         return $this->hasMany(Job::class, 'company_id');
+    }
+    public function organizers()
+    {
+        return $this->morphMany(Organizer::class, 'owner');
     }
 }

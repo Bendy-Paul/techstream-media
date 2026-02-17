@@ -69,10 +69,11 @@ class DashboardController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
+            'phone_number' => 'string|max:255|unique:users,phone_number,' . auth()->id(),
             'current_password' => ['required', 'current_password'],
         ]);
 
-        auth()->user()->update($request->only('name', 'email'));
+        auth()->user()->update($request->only('name', 'email', 'phone_number'));
 
         return back()->with('success', 'Profile updated successfully.');
     }

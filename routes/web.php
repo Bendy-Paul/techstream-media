@@ -30,7 +30,7 @@ use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 
 
 Route::middleware('auth', 'role:user')->group(function () {
-    
+
     Route::controller(App\Http\Controllers\User\DashboardController::class)->group(function () {
         Route::get('/user/dashboard', 'index')->name('user.dashboard');
         Route::get('/user/saved-items', 'savedItems')->name('user.saved-items');
@@ -53,7 +53,7 @@ Route::middleware('auth', 'role:user')->group(function () {
             'destroy' => 'user.resumes.destroy',
         ]
     ]);
-    
+
     // Application Routes
     Route::post('/jobs/apply', [App\Http\Controllers\JobApplicationController::class, 'store'])->name('job.apply');
     Route::delete('/applications/{id}', [App\Http\Controllers\JobApplicationController::class, 'destroy'])->name('applications.destroy');
@@ -61,6 +61,27 @@ Route::middleware('auth', 'role:user')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Organizer Routes
+    Route::controller(App\Http\Controllers\User\OrganizerController::class)->group(function () {
+        Route::get('/user/organizer', 'index')->name('user.organizer.index'); // Dashboard
+        Route::get('/user/organizer/create', 'create')->name('user.organizer.create');
+        Route::post('/user/organizer', 'store')->name('user.organizer.store');
+        Route::get('/user/organizer/edit', 'edit')->name('user.organizer.edit');
+        Route::put('/user/organizer', 'update')->name('user.organizer.update');
+    });
+
+    // Organizer Event Routes
+    Route::resource('user/organizer/events', App\Http\Controllers\User\OrganizerEventController::class, [
+        'names' => [
+            'index' => 'user.organizer.events.index',
+            'create' => 'user.organizer.events.create',
+            'store' => 'user.organizer.events.store',
+            'edit' => 'user.organizer.events.edit',
+            'update' => 'user.organizer.events.update',
+            'destroy' => 'user.organizer.events.destroy',
+        ]
+    ]);
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -193,8 +214,7 @@ Route::get('/all-states', function () {
     return view('public.all-states', compact('states'));
 })->name('all-states');
 
-Route::get('/states/{slug}', [StateController::class, 'show'])->name('state-detail')
-;
+Route::get('/states/{slug}', [StateController::class, 'show'])->name('state-detail');
 Route::get('/states', [StateController::class, 'index'])->name('states');
 
 /*

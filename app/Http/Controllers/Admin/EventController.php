@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\Admin\StoreEventRequest;
 use App\Http\Requests\Admin\UpdateEventRequest;
+use App\Models\Organizer;
 
 class EventController extends Controller
 {
@@ -49,8 +50,7 @@ class EventController extends Controller
     {
         // 1. Get the validated data from your Request class
         $data = $request->validated();
-        
-        
+
         try {
             $virtual = $request->input('is_virtual', false);
             // Start a Database Transaction to ensure data integrity
@@ -61,9 +61,36 @@ class EventController extends Controller
                     $data['banner_image'] = $request->file('banner_image_upload')->store('events/banners', 'public');
                 }
 
+                // Determine Organizer (Owner)
+                $organizerId = null;
+                $companyIds = $request->input('organizers', []);
+
+                if (!empty($companyIds)) {
+                    // Take the first company as the primary owner
+                    $ownerCompanyId = $companyIds[0];
+                    $company = Company::find($ownerCompanyId);
+
+                    if ($company) {
+                        // Find or Create Organizer Profile for this Company
+                        // We assume one profile per company for now, or use the first one found.
+                        $organizer = $company->organizers()->first();
+
+                        if (!$organizer) {
+                            $organizer = $company->organizers()->create([
+                                'name' => $company->name,
+                                'slug' => Str::slug($company->name . '-organizer-' . uniqid()), // Ensure unique slug
+                                'email' => $company->email,
+                                'description' => $company->description,
+                                'logo_path' => $company->logo_url, // Assuming compatible or null
+                            ]);
+                        }
+                        $organizerId = $organizer->id;
+                    }
+                }
+
                 // 3. Create the Main Event
-                // We use except() to remove fields that don't belong in the events table
                 $event = Event::create([
+                    'organizer_id' => $organizerId, // Set the owner
                     'title' => $request->title,
                     'slug' => Str::slug($request->title),
                     'description' => $request->description,
@@ -73,21 +100,24 @@ class EventController extends Controller
                     'start_datetime' => $request->start_datetime,
                     'end_datetime' => $request->end_datetime,
                     'banner_image_url' => $data['banner_image'] ?? null,
-
                 ]);
 
                 // 4. Attach Many-to-Many Relationships
                 $event->categories()->sync($request->categories);
-                $event->organizers()->sync($request->organizers);
+                // Use coOrganizers to sync the companies as generic partners/co-hosts
+                // We sync ALL selected companies, including the owner, to the pivot table for backward compatibility/display
+                $event->coOrganizers()->sync($request->organizers);
                 $event->partners()->sync($request->partners);
                 $event->tags()->sync($request->tags);
 
                 // 5. Handle Dynamic Speakers
-                if ($request->has('speakers') && $request->speakers->name != null) {
+                if ($request->has('speakers') && is_array($request->speakers)) {
                     foreach ($request->speakers as $index => $speakerData) {
+                        if (empty($speakerData['name'])) continue; // Skip empty
+
                         $speaker = $event->speakers()->create([
                             'name' => $speakerData['name'],
-                            'position' => $speakerData['position'],
+                            'position' => $speakerData['position'] ?? null,
                         ]);
 
                         // Check if this specific speaker has an image
@@ -106,7 +136,7 @@ class EventController extends Controller
                     }
                 }
 
-                return redirect()->route('admin.events')
+                return redirect()->route('admin.events.index')
                     ->with('success', 'Event created successfully!');
             });
         } catch (\Exception $e) {
@@ -132,7 +162,8 @@ class EventController extends Controller
      */
     public function edit($id)
     {
-        $event = Event::with(['categories', 'organizers', 'partners', 'tags', 'speakers', 'galleries'])->findOrFail($id);
+        // Eager load coOrganizers (which currently serves as the list of attached companies)
+        $event = Event::with(['categories', 'coOrganizers', 'partners', 'tags', 'speakers', 'galleries'])->findOrFail($id);
         $categories = Category::where('type', 'event')->get();
         $companies = Company::all();
         $tags = Tag::all();
@@ -151,26 +182,50 @@ class EventController extends Controller
 
         try {
             $virtual = $request->input('is_virtual', false);
-            
+
             DB::transaction(function () use ($request, $event, $data, $virtual) {
 
                 // 1. Handle Banner Image
                 $bannerPath = $event->banner_image_url;
                 if ($request->hasFile('banner_image_upload')) {
-                     // Start: Fix for legacy/new path consistency
+                    // Start: Fix for legacy/new path consistency
                     if ($event->banner_image_url && Storage::disk('public')->exists($event->banner_image_url)) {
-                       // Storage::disk('public')->delete($event->banner_image_url);
+                        // Storage::disk('public')->delete($event->banner_image_url);
                     }
                     $path = $request->file('banner_image_upload')->store('events/banners', 'public');
-                   // $bannerPath = 'storage/' . $path; // Consistent with article fix? 
-                   // Looking at store method, it saves relative path. The view handles 'storage/'.
-                   // Actually, ArticleController store saved relative path, but I changed it to 'storage/'.
-                   // EventController store saves relative path. Let's keep consistent with existing EventController store.
-                   $bannerPath = $path; // The view should handle asset('storage/'.$path)
+                    $bannerPath = $path;
+                }
+
+                // Determine Organizer (Owner)
+                $organizerId = $event->organizer_id; // Keep existing by default
+                $companyIds = $request->input('organizers', []);
+
+                // If the submitted organizers list is not empty, check if we need to update the owner
+                if (!empty($companyIds)) {
+                    // Take the first company as the primary owner
+                    $ownerCompanyId = $companyIds[0];
+                    $company = Company::find($ownerCompanyId);
+
+                    if ($company) {
+                        // Find or Create Organizer Profile
+                        $organizer = $company->organizers()->first();
+
+                        if (!$organizer) {
+                            $organizer = $company->organizers()->create([
+                                'name' => $company->name,
+                                'slug' => Str::slug($company->name . '-organizer-' . uniqid()),
+                                'email' => $company->email,
+                                'description' => $company->description,
+                                'logo_path' => $company->logo_url,
+                            ]);
+                        }
+                        $organizerId = $organizer->id;
+                    }
                 }
 
                 // 2. Update Main Event
                 $event->update([
+                    'organizer_id' => $organizerId,
                     'title' => $request->title,
                     'slug' => Str::slug($request->title),
                     'description' => $request->description,
@@ -184,54 +239,29 @@ class EventController extends Controller
 
                 // 3. Sync Relationships
                 $event->categories()->sync($request->input('categories', []));
-                $event->organizers()->sync($request->input('organizers', []));
+                $event->coOrganizers()->sync($request->input('organizers', [])); // Synced as pivot
                 $event->partners()->sync($request->input('partners', []));
                 $event->tags()->sync($request->input('tags', []));
 
-                // 4. Handle Speakers (This is tricky - ideally we sync or update existing)
-                // For simplicity, we might clear and recreate, OR try to update if ID exists.
-                // The create form sends array of speakers. Edit form needs to handle this.
-                // Current implementation in store creates new.
-                // strategy: Delete all and recreate? Or update?
-                // Given the complex nature (images involved), delete and recreate is easiest but loses old images if not careful.
-                // Better strategy:
-                // - If ID is present, update.
-                // - If ID is NOT present, create.
-                // - If ID is missing from request but exists in DB, delete.
-                // However, the request structure in `store` was just an array of data.
-                
-                // Let's implement a wipe-and-replace for speakers for simplicity consistent with the request, 
-                // BUT we must preserve images if not re-uploaded. 
-                // Actually, let's keep it simple: clear old speakers and create new ones is destructive to images not re-uploaded.
-                // Correct approach:
-                // The user needs to re-enter speakers? No, that's bad UX.
-                // The edit view should list existing speakers.
-                
-                // Let's do a simple full replacement for now, as managing partial updates for nested dynamic forms is complex without JS logic.
-                // NOTE: Proper implementation requires JS to track IDs. 
-                // I will delete old speakers and recreate them. 
-                // LIMITATION: User must re-upload speaker images if they edit speakers. 
-                // TO IMPROVE: Check if we can keep images.
-                
-                $event->speakers()->delete(); // This deletes records. Images remain in storage (orphaned).
-                
-                if ($request->has('speakers')) {
+                // 4. Handle Speakers
+                $event->speakers()->delete(); // Warning: Destructive to existing speakers
+
+                if ($request->has('speakers') && is_array($request->speakers)) {
                     foreach ($request->speakers as $index => $speakerData) {
-                         // Skip empty rows
-                        if(empty($speakerData['name'])) continue;
+                        // Skip empty rows
+                        if (empty($speakerData['name'])) continue;
 
                         $imgPath = null;
                         // Logic to preserve image if we had hidden input? 
-                        // For now, new speakers or re-added speakers need image upload.
                         if ($request->hasFile("speaker_images.$index")) {
-                             $imgPath = $request->file("speaker_images.$index")->store('events/speakers', 'public');
+                            $imgPath = $request->file("speaker_images.$index")->store('events/speakers', 'public');
                         } elseif (isset($speakerData['existing_image'])) {
                             $imgPath = $speakerData['existing_image'];
                         }
 
                         $event->speakers()->create([
                             'name' => $speakerData['name'],
-                            'position' => $speakerData['position'],
+                            'position' => $speakerData['position'] ?? null,
                             'image_path' => $imgPath
                         ]);
                     }
@@ -244,12 +274,11 @@ class EventController extends Controller
                         $event->gallery()->create(['image_path' => $path]);
                     }
                 }
-                
+
                 // Handle Gallery Deletion (if requested)
                 if ($request->has('delete_gallery_ids')) {
                     $event->gallery()->whereIn('id', $request->delete_gallery_ids)->delete();
                 }
-
             });
 
             return redirect()->route('admin.events.index')
@@ -269,19 +298,19 @@ class EventController extends Controller
         // Delete associated images from storage
         if ($event->banner_image_url) {
             Storage::disk('public')->delete($event->banner_image_url);
-    }
-    // Delete associated gallery images
-    foreach ($event->galleries as $gallery) {
-        Storage::disk('public')->delete($gallery->image_path);
-    }
-    // Delete associated speaker images
-    foreach ($event->speakers as $speaker) {
-        if ($speaker->image_path) {
-            Storage::disk('public')->delete($speaker->image_path);
         }
-    }
-    // Finally, delete the event itself
-    $event->delete();
+        // Delete associated gallery images
+        foreach ($event->galleries as $gallery) {
+            Storage::disk('public')->delete($gallery->image_path);
+        }
+        // Delete associated speaker images
+        foreach ($event->speakers as $speaker) {
+            if ($speaker->image_path) {
+                Storage::disk('public')->delete($speaker->image_path);
+            }
+        }
+        // Finally, delete the event itself
+        $event->delete();
         return redirect()->route('admin.events')->with('success', 'Event deleted successfully!');
-}
+    }
 }

@@ -61,6 +61,12 @@
                         <a class="nav-link {{ request()->routeIs('user.applications.index') ? 'active' : '' }}" href="{{ route('user.applications.index') }}">
                             <i class="fas fa-briefcase"></i> Applications
                         </a>
+                        <div class="my-2 border-top"></div>
+                        <small class="text-uppercase text-muted fw-bold px-4 mb-2 d-block" style="font-size: 0.75rem; letter-spacing: 1px;">Organizer</small>
+                        <a class="nav-link {{ request()->routeIs('user.organizer.*') ? 'active' : '' }}" href="{{ route('user.organizer.index') }}">
+                            <i class="fas fa-calendar-check"></i> Manage Events
+                        </a>
+                        <div class="my-2 border-top"></div>
                         <a class="nav-link {{ request()->routeIs('user.settings') ? 'active' : '' }}" href="{{ route('user.settings') }}">
                             <i class="fas fa-cog"></i> Settings
                         </a>

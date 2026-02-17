@@ -10,8 +10,16 @@ class Event extends Model
 {
     use RecordsActivity;
     //
+    const STATUS_PUBLISHED = 'published';
+    const STATUS_PENDING   = 'pending';
+    const STATUS_DUPLICATE = 'duplicate';
+    const STATUS_FLAGGED   = 'flagged';
+    const STATUS_REJECTED  = 'rejected';
+    const STATUS_ARCHIVED  = 'archived';
+
     protected $fillable = [
-        'organizer_company_id',
+        'organizer_id',
+        'event_status',
         'title',
         'slug',
         'description',
@@ -34,9 +42,23 @@ class Event extends Model
         return $this->belongsToMany(Category::class, EventCategories::class, 'event_id', 'category_id');
     }
 
-    public function organizers()
+    public function organizer()
     {
-        return $this->belongsToMany(Company::class, EventOrganizer::class, 'event_id', 'company_id');
+        return $this->belongsTo(Organizer::class);
+    }
+
+    public function coOrganizers()
+    {
+        return $this->belongsToMany(Company::class, 'event_organizers', 'event_id', 'company_id');
+    }
+
+    /**
+     * Accessor for backward compatibility with views using $event->organizers.
+     * Returns the collection of co-organizer companies.
+     */
+    public function getOrganizersAttribute()
+    {
+        return $this->coOrganizers;
     }
 
     public function partners()

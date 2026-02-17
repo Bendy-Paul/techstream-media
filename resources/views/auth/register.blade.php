@@ -63,6 +63,10 @@
                     <input type="email" name="email" class="form-control" required value="">
                 </div>
                 <div class="mb-3">
+                    <label class="form-label small fw-bold text-muted">Phone Number</label>
+                    <input type="text" name="phone_number" class="form-control" required value="">
+                </div>
+                <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Password</label>
                     <input type="password" name="password" class="form-control" required>
                 </div>

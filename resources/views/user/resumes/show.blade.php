@@ -95,7 +95,7 @@
     <div class="a4-page resume-content">
         <header class="resume-header text-center mb-4">
             <h1 class="fw-bold">{{ auth()->user()->name }}</h1>
-            <p>{{ auth()->user()->email }} | {{ auth()->user()->phone ?? 'Phone Number' }}</p>
+            <p>{{ auth()->user()->email }} | {{ auth()->user()->phone_number ?? '' }}</p>
         </header>
 
         @if($resume->summary)
