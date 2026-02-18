@@ -20,13 +20,20 @@ class DashboardController extends Controller
         $savedItemsCount = $user->savedItems()->count();
         $activities = $user->activities()->latest()->take(10)->get();
 
-        return view('user.dashboard', compact('resumeCount', 'applicationsCount', 'resumeLimit', 'savedItemsCount', 'activities'));
+        $recommendedJobs = \App\Models\JobRecommendation::where('user_id', $user->id)
+            ->where('score', '>=', 50)
+            ->with(['job.company', 'job.city'])
+            ->orderBy('score', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('user.dashboard', compact('resumeCount', 'applicationsCount', 'resumeLimit', 'savedItemsCount', 'activities', 'recommendedJobs'));
     }
 
     public function savedItems()
     {
         $user = auth()->user();
-        
+
         $savedJobs = $user->savedItems()
             ->where('item_type', Job::class)
             ->with('item.company', 'item.city') // Eager load relationships

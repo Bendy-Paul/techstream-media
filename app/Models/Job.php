@@ -31,6 +31,7 @@ class Job extends Model
         'expires_at',
         'skills',
         'screening_questions',
+        'status',
     ];
 
     protected $casts = [
@@ -38,6 +39,12 @@ class Job extends Model
         'expires_at' => 'datetime',
         'screening_questions' => 'json',
     ];
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')
+            ->where('expires_at', '>', now());
+    }
 
     public function applications()
     {
@@ -47,72 +54,74 @@ class Job extends Model
     public function keywords()
     {
         return $this->belongsToMany(Keyword::class, 'job_keyword')
-                    ->withPivot('weight');
+            ->withPivot('weight');
     }
 
     /**
      * Calculate match score with a resume
      */
-public function calculateMatchScore(Resume $resume): int
-{
-    // 1. Get the User's Skill IDs
-    $userSkillIds = $resume->skills()->pluck('skills')->flatten()->unique()->toArray();
+    public function calculateMatchScore(Resume $resume): int
+    {
+        // 1. Get the User's Skill IDs
+        // 1. Get the User's Skill IDs
+        // Use property access to leverage eager loading if available
+        $userSkillIds = $resume->skills->pluck('skills')->flatten()->unique()->toArray();
 
-    // 2. Get Job Tool IDs (Hard Skills directly linked via 'tools' relationship)
-    $jobToolIds = $this->tools()->pluck('stacks.id')->toArray();
-    
-    // 3. Get Job Keywords with weights
-    $jobKeywords = $this->keywords()->get();
+        // 2. Get Job Tool IDs (Hard Skills directly linked via 'tools' relationship)
+        $jobToolIds = $this->tools()->pluck('stacks.id')->toArray();
 
-    // 4. Calculate Keyword Match
-    $totalWeight = 0;
-    $matchedWeight = 0;
+        // 3. Get Job Keywords with weights
+        $jobKeywords = $this->keywords()->get();
 
-    // Pre-fetch Stack IDs for all keywords to avoid N+1 queries
-    $keywordNames = $jobKeywords->pluck('name')->toArray();
-    $stackMap = \App\Models\Stack::whereIn('name', $keywordNames)
-                    ->pluck('id', 'name')
-                    ->mapWithKeys(fn($item, $key) => [strtolower($key) => $item]);
+        // 4. Calculate Keyword Match
+        $totalWeight = 0;
+        $matchedWeight = 0;
 
-    foreach ($jobKeywords as $keyword) {
-        $weight = $keyword->pivot->weight ?? 1;
-        $totalWeight += $weight;
+        // Pre-fetch Stack IDs for all keywords to avoid N+1 queries
+        $keywordNames = $jobKeywords->pluck('name')->toArray();
+        $stackMap = \App\Models\Stack::whereIn('name', $keywordNames)
+            ->pluck('id', 'name')
+            ->mapWithKeys(fn($item, $key) => [strtolower($key) => $item]);
 
-        $stackId = $stackMap->get(strtolower($keyword->name));
+        foreach ($jobKeywords as $keyword) {
+            $weight = $keyword->pivot->weight ?? 1;
+            $totalWeight += $weight;
 
-        if ($stackId && in_array($stackId, $userSkillIds)) {
-            $matchedWeight += $weight;
+            $stackId = $stackMap->get(strtolower($keyword->name));
+
+            if ($stackId && in_array($stackId, $userSkillIds)) {
+                $matchedWeight += $weight;
+            }
         }
-    }
 
-    // 5. Tool Match
-    $toolScore = 0;
-    $hasTools = count($jobToolIds) > 0;
-    
-    if ($hasTools) {
-        $matchedTools = count(array_intersect($jobToolIds, $userSkillIds));
-        $toolScore = ($matchedTools / count($jobToolIds)) * 100;
-    }
+        // 5. Tool Match
+        $toolScore = 0;
+        $hasTools = count($jobToolIds) > 0;
 
-    $hasKeywords = $totalWeight > 0;
-    $keywordScore = $hasKeywords ? ($matchedWeight / $totalWeight) * 100 : 100;
+        if ($hasTools) {
+            $matchedTools = count(array_intersect($jobToolIds, $userSkillIds));
+            $toolScore = ($matchedTools / count($jobToolIds)) * 100;
+        }
 
-    // Edge cases
-    if (!$hasTools && !$hasKeywords) {
-        return 100; // No requirements → perfect match
-    }
-    
-    if (!$hasTools) {
-        return (int) round($keywordScore); // Only keywords count
-    }
-    
-    if (!$hasKeywords) {
-        return (int) round($toolScore); // Only tools count
-    }
+        $hasKeywords = $totalWeight > 0;
+        $keywordScore = $hasKeywords ? ($matchedWeight / $totalWeight) * 100 : 100;
 
-    // Weighted average when both exist (70% tools, 30% keywords)
-    return (int) round(($toolScore * 0.7) + ($keywordScore * 0.3));
-}
+        // Edge cases
+        if (!$hasTools && !$hasKeywords) {
+            return 100; // No requirements → perfect match
+        }
+
+        if (!$hasTools) {
+            return (int) round($keywordScore); // Only keywords count
+        }
+
+        if (!$hasKeywords) {
+            return (int) round($toolScore); // Only tools count
+        }
+
+        // Weighted average when both exist (70% tools, 30% keywords)
+        return (int) round(($toolScore * 0.7) + ($keywordScore * 0.3));
+    }
     public function city()
     {
         return $this->belongsTo(City::class);

@@ -29,6 +29,7 @@ class Company extends Model
         'subscription_tier',
         'team_size',
         'starting_cost',
+        'status',
         // Add other fields as necessary
     ];
 

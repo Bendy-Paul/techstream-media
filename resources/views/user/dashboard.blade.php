@@ -215,21 +215,119 @@
                 <h6 class="card-title mb-0">Recommended for You</h6>
             </div>
             <div class="card-body p-0">
-                <div class="list-group list-group-flush">
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-4 py-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">React Developer</h6>
-                            <small class="text-muted">New</small>
-                        </div>
-                        <p class="mb-1 small text-muted">Remote • Full-time</p>
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action border-0 px-4 py-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">Product Designer</h6>
-                        </div>
-                        <p class="mb-1 small text-muted">Lagos • Contract</p>
-                    </a>
+<div class="list-group list-group-flush">
+    @forelse($recommendedJobs as $job)
+
+        @php
+            $score = $job->score ?? 0;
+
+            if ($score >= 80) {
+                $color = 'success';
+                $gradient = 'linear-gradient(90deg,#16a34a,#22c55e)';
+            } elseif ($score >= 60) {
+                $color = 'primary';
+                $gradient = 'linear-gradient(90deg,#2563eb,#3b82f6)';
+            } elseif ($score >= 40) {
+                $color = 'warning';
+                $gradient = 'linear-gradient(90deg,#f59e0b,#fbbf24)';
+            } else {
+                $color = 'danger';
+                $gradient = 'linear-gradient(90deg,#dc2626,#ef4444)';
+            }
+        @endphp
+
+        <a href="{{ route('job.show', $job->job->slug) }}"
+           class="list-group-item border-0 px-4 py-3 mb-2 rounded-4 shadow-sm"
+           style="transition: all .25s ease;">
+
+            {{-- HOVER STYLE --}}
+            <div style="transition:.25s;"
+                 onmouseover="this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 24px rgba(0,0,0,.08)'"
+                 onmouseout="this.style.transform='';this.style.boxShadow=''">
+
+                {{-- HEADER --}}
+                <div class="d-flex justify-content-between align-items-start mb-2">
+
+                    <div>
+                        <h5 class="mb-1 fw-semibold">
+                            {{ $job->job->title }}
+                        </h5>
+
+                        <small class="text-muted">
+                            {{ $job->job->company->name ?? 'Confidential' }}
+                            •
+                            {{ $job->job->city->name ?? $job->job->location ?? 'Remote' }}
+                            •
+                            {{ $job->job->job_type }}
+                        </small>
+                    </div>
+
+                    <div class="text-end">
+
+                        {{-- MATCH BADGE --}}
+                        <span class="badge bg-{{ $color }} rounded-pill px-3 py-2"
+                              style="font-size:.75rem; letter-spacing:.5px;">
+                             {{ floor($score) }}% Match
+                        </span>
+
+                        @if($job->job->is_new)
+                            <div>
+                                <span class="badge bg-success-subtle text-success mt-1">
+                                    New
+                                </span>
+                            </div>
+                        @endif
+
+                    </div>
                 </div>
+
+                {{-- MATCH BAR --}}
+                <div class="progress rounded-pill"
+                     style="height:8px; background:#eef2f7;">
+
+                    <div class="progress-bar"
+                         role="progressbar"
+                         style="
+                            width: {{ $score }}%;
+                            background: {{ $gradient }};
+                            transition: width .6s ease;
+                         ">
+                    </div>
+
+                </div>
+
+                {{-- OPTIONAL MICROCOPY --}}
+                <div class="mt-2">
+                    <small class="text-muted">
+                        Strong alignment with your skills — higher match increases interview probability.
+                    </small>
+                </div>
+
+            </div>
+        </a>
+
+    @empty
+        <div class="text-center py-5 text-muted">
+
+            <i class="fas fa-brain fa-2x mb-3 opacity-50"></i>
+
+            <p class="mb-1 fw-semibold">
+                Your recommendation engine is warming up…
+            </p>
+
+            <small>
+                Update your resume skills to unlock smarter matches.
+            </small>
+
+            <div class="mt-2">
+                <a href="{{ route('user.resumes.index') }}" class="fw-semibold">
+                    Improve my matches →
+                </a>
+            </div>
+
+        </div>
+    @endforelse
+</div>
             </div>
         </div>
     </div>

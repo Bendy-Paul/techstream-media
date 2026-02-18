@@ -14,6 +14,7 @@ use App\Models\Stack;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Jobs\ProcessJobRecommendations;
 
 class ResumeController extends Controller
 {
@@ -95,7 +96,10 @@ class ResumeController extends Controller
 
             DB::commit();
 
+            ProcessJobRecommendations::dispatch($user->id);
+
             return redirect()->route('user.resumes.index')->with('success', 'Resume created successfully.');
+
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -135,6 +139,7 @@ class ResumeController extends Controller
      */
     public function update(UpdateResumeRequest $request, Resume $resume)
     {
+        $user = Auth::user();
         $this->authorizeResume($resume);
 
         DB::beginTransaction();
@@ -202,6 +207,8 @@ class ResumeController extends Controller
             }
 
             DB::commit();
+
+            ProcessJobRecommendations::dispatch($user->id);
 
             return redirect()->route('user.resumes.index')->with('success', 'Resume updated successfully.');
 
