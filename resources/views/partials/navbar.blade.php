@@ -118,8 +118,8 @@
                             <a href="{{ url('/user/dashboard') }}"><button class="btn-get-listed">Dashboard</button></a>
                         @elseif(Auth::user()->role == 'admin')
                             <a href="{{ url('/admin/dashboard') }}"><button class="btn-get-listed">Admin Panel</button></a>
-                        @elseif(Auth::user()->role == 'Company')
-                            <a href="{{ url('/Company/dashboard') }}"><button class="btn-get-listed">Company Panel</button></a>
+                        @elseif(Auth::user()->role == 'company')
+                            <a href="{{ url('/company-panel/dashboard') }}"><button class="btn-get-listed">Company Panel</button></a>
                         @endif
                     @else
                     <a href="{{ url('/login') }}"><button class="btn-get-listed">login</button></a>

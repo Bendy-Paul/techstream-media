@@ -29,7 +29,7 @@ use App\Http\Controllers\Admin\ProfileController as AdminProfileController;
 
 
 
-Route::middleware('auth', 'role:user')->group(function () {
+Route::middleware(['auth', 'role:user', 'verified'])->group(function () {
 
     Route::controller(App\Http\Controllers\User\DashboardController::class)->group(function () {
         Route::get('/user/dashboard', 'index')->name('user.dashboard');
@@ -87,6 +87,18 @@ Route::middleware('auth', 'role:user')->group(function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/saved-items', [App\Http\Controllers\SavedItemController::class, 'store'])->name('saved-items.store');
     Route::post('/reviews', [App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+});
+
+Route::middleware(['auth', 'role:company', 'verified'])->prefix('company-panel')->name('company.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\Company\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profile', [App\Http\Controllers\Company\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [App\Http\Controllers\Company\ProfileController::class, 'update'])->name('profile.update');
+
+    Route::middleware('company.verified')->group(function () {
+        Route::resource('jobs', App\Http\Controllers\Company\JobController::class);
+        Route::resource('articles', App\Http\Controllers\Company\ArticleController::class);
+        Route::resource('events', App\Http\Controllers\Company\EventController::class);
+    });
 });
 
 Route::middleware('auth', 'role:admin')->group(function () {

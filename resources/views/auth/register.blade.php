@@ -78,7 +78,7 @@
                     <label class="form-label small fw-bold text-muted">I want to...</label>
                     <select name="role" class="form-select">
                         <option value="user">Explore Tech Companies & Jobs</option>
-                        <option value="company_owner">List My Company / Post Jobs</option>
+                        <option value="company">List My Company / Post Jobs</option>
                     </select>
                 </div>
 
