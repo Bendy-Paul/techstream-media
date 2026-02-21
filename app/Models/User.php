@@ -13,6 +13,11 @@ class User extends Authenticatable implements MustVerifyEmail
     const ROLE_COMPANY = 'company';
     const ROLE_USER    = 'user';
     const ROLE_EVENT_ORGANIZER = 'event_organizer';
+    
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\QueuedVerifyEmail);
+    }
 
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;

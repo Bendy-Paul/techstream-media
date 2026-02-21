@@ -56,30 +56,48 @@
 
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Full Name</label>
-                    <input type="text" name="name" class="form-control" required value="">
+                    <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" required value="{{ old('name') }}">
+                    @error('name')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Email Address</label>
-                    <input type="email" name="email" class="form-control" required value="">
+                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" required value="{{ old('email') }}">
+                    @error('email')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Phone Number</label>
-                    <input type="text" name="phone_number" class="form-control" required value="">
+                    <input type="text" name="phone_number" class="form-control @error('phone_number') is-invalid @enderror" required value="{{ old('phone_number') }}">
+                    @error('phone_number')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Password</label>
-                    <input type="password" name="password" class="form-control" required>
+                    <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+                    @error('password')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Confirm Password</label>
-                    <input type="password" name="password_confirmation" class="form-control" required>
+                    <input type="password" name="password_confirmation" class="form-control @error('password_confirmation') is-invalid @enderror" required>
+                    @error('password_confirmation')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">I want to...</label>
-                    <select name="role" class="form-select">
-                        <option value="user">Explore Tech Companies & Jobs</option>
-                        <option value="company">List My Company / Post Jobs</option>
+                    <select name="role" class="form-select @error('role') is-invalid @enderror">
+                        <option value="user" {{ old('role') == 'user' ? 'selected' : '' }}>Explore Tech Companies & Jobs</option>
+                        <option value="company" {{ old('role') == 'company' ? 'selected' : '' }}>List My Company / Post Jobs</option>
                     </select>
+                    @error('role')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 <!-- Math CAPTCHA -->

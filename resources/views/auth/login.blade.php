@@ -47,12 +47,17 @@
                 @csrf
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Email Address</label>
-                    <input type="email" name="email" class="form-control" required value="">
-                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                    <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" required value="{{ old('email') }}">
+                    @error('email')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3">
                     <label class="form-label small fw-bold text-muted">Password</label>
-                    <input type="password" name="password" class="form-control" required>
+                    <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+                    @error('password')
+                        <div class="text-danger small mt-1">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="mb-3 form-check">
                     <input type="checkbox" name="remember" class="form-check-input" id="remember_me">

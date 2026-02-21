@@ -31,9 +31,9 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'phone_number' => ['string', 'max:255'],
-            'role' => ['required', 'in:'.User::ROLE_USER.','.User::ROLE_COMPANY.','.User::ROLE_EVENT_ORGANIZER],
+            'role' => ['required', 'in:' . User::ROLE_USER . ',' . User::ROLE_COMPANY . ',' . User::ROLE_EVENT_ORGANIZER],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -49,10 +49,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-    return redirect()->route(
-        match ($user->role) {
-            'company' => 'company.dashboard',
-            'user'   => 'user.dashboard',
-        }
-    );    }
+        return redirect()->route(
+            match ($user->role) {
+                'company' => 'company.dashboard',
+                'user'   => 'user.dashboard',
+            }
+        );
+    }
 }
