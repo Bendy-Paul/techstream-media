@@ -41,8 +41,8 @@ class JobApplication extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function resume()
-    {
-        return $this->belongsTo(Resume::class)->withTrashed(); // In case resume is deleted later
-    }
+    // public function resume()
+    // {
+    //     return $this->belongsTo(Resume::class)->withTrashed(); // In case resume is deleted later
+    // }
 }

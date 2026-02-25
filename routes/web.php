@@ -98,6 +98,14 @@ Route::middleware(['auth', 'role:company', 'verified'])->prefix('company-panel')
         Route::resource('jobs', App\Http\Controllers\Company\JobController::class);
         Route::resource('articles', App\Http\Controllers\Company\ArticleController::class);
         Route::resource('events', App\Http\Controllers\Company\EventController::class);
+
+        // Applicants for a specific job
+        Route::get('jobs/{job}/applicants', [App\Http\Controllers\Company\ApplicationController::class, 'index'])
+            ->name('jobs.applicants');
+        Route::put('jobs/{job}/applicants/{application}', [App\Http\Controllers\Company\ApplicationController::class, 'update'])
+            ->name('jobs.applicants.update');
+        Route::post('jobs/{job}/applicants/bulk-update', [App\Http\Controllers\Company\ApplicationController::class, 'bulkUpdate'])
+            ->name('jobs.applicants.bulk-update');
     });
 });
 

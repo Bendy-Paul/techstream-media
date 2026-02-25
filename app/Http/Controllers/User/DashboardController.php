@@ -8,17 +8,21 @@ use Illuminate\Http\Request;
 use App\Models\Job;
 use App\Models\Company;
 use App\Models\Event;
+use Illuminate\Support\Facades\Auth;
+use App\Models\User; 
+
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $user = auth()->user();
-        $resumeCount = $user->resumes()->count();
-        $applicationsCount = $user->applications()->count();
-        $resumeLimit = $user->resume_limit;
-        $savedItemsCount = $user->savedItems()->count();
-        $activities = $user->activities()->latest()->take(10)->get();
+/** @var \App\Models\User $user */
+    $user = Auth::user();
+    $resumeCount = $user->resumes()->count();
+    $applicationsCount = $user->applications()->count();
+    $resumeLimit = $user->resume_limit;
+    $savedItemsCount = $user->savedItems()->count();
+    $activities = $user->activities()->latest()->take(10)->get();
 
         $recommendedJobs = \App\Models\JobRecommendation::where('user_id', $user->id)
             ->where('score', '>=', 50)
@@ -32,7 +36,8 @@ class DashboardController extends Controller
 
     public function savedItems()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         $savedJobs = $user->savedItems()
             ->where('item_type', Job::class)
@@ -60,7 +65,7 @@ class DashboardController extends Controller
 
     public function applications()
     {
-        $user = auth()->user();
+        $user = Auth::user();
         // $slot 
         $applications = $user->applications;
         return view('user.applications.index', compact('applications'));
@@ -75,24 +80,28 @@ class DashboardController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
-            'phone_number' => 'string|max:255|unique:users,phone_number,' . auth()->id(),
+            'email' => 'required|email|max:255|unique:users,email,' . Auth::user()->id,
+            'phone_number' => 'string|max:255|unique:users,phone_number,' . Auth::user()->id,
             'current_password' => ['required', 'current_password'],
         ]);
+        /** @var \App\Models\User $user */
+    $user = Auth::user();
 
-        auth()->user()->update($request->only('name', 'email', 'phone_number'));
+        $user->update($request->only('name', 'email', 'phone_number'));
 
         return back()->with('success', 'Profile updated successfully.');
     }
 
     public function updatePassword(Request $request)
     {
+        /** @var \App\Models\User $user */
+    $user = Auth::user();
         $request->validate([
             'current_password' => ['required', 'current_password'],
             'password' => ['required', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],
         ]);
 
-        auth()->user()->update([
+        $user->update([
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
         ]);
 
@@ -101,7 +110,8 @@ class DashboardController extends Controller
 
     public function updateSubscriptions(Request $request)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+    $user = Auth::user();
         $user->is_subscribed_newsletter = $request->has('is_subscribed_newsletter');
         $user->is_subscribed_job_board = $request->has('is_subscribed_job_board');
         $user->save();

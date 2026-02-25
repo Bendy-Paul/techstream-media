@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Company;
 use App\Models\City;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
     public function edit()
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
         $company = $user->company;
         $cities = City::all();
 
@@ -20,7 +22,8 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $user = auth()->user();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',

@@ -6,6 +6,13 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Resume;
+use App\Models\SavedItem;
+use App\Models\Review;
+use App\Models\JobApplication;
+use App\Models\Activity;
+use App\Models\Organizer;
+use App\Models\Company;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
